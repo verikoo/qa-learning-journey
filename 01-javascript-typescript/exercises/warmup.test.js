@@ -36,3 +36,8 @@ test('empty username and password returns both required', async () => {
   const result = await fakeLogin('', '');
   assert.strictEqual(result, 'Username and password are required');
 });
+
+test('uppercase username logs in successfully', async () => {
+  const result = await fakeLogin('ADMIN', '1234');
+  assert.strictEqual(result, 'Login successful');
+});
