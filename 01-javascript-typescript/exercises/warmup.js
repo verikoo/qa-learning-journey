@@ -26,12 +26,13 @@ function wait(ms) {
 // An async function ALWAYS returns a Promise, even if we return plain text.
 
 async function fakeLogin(username, password) {
+     const normalizedUsername = username.toLowerCase();
 
-    if (username === '' && password === '') {
+    if (normalizedUsername  === '' && password === '') {
         return 'Username and password are required';
     }
 
-    if (username === '') {
+    if (normalizedUsername === '') {
         return 'Username is required';
     }
 
@@ -44,7 +45,7 @@ async function fakeLogin(username, password) {
 
     await wait(1000);// pause 1 second, like waiting for a real server
 
-    if (username === 'admin' && password === '1234') {
+    if (normalizedUsername === 'admin' && password === '1234') {
         return 'Login successful';
     }
 
