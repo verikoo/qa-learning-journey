@@ -1,0 +1,24 @@
+{
+  "name": "qa-learning-journey",
+  "version": "1.0.0",
+  "description": "Oct 30, 2026 · @veriko",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/verikoo/qa-learning-journey.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/verikoo/qa-learning-journey/issues"
+  },
+  "homepage": "https://github.com/verikoo/qa-learning-journey#readme",
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
