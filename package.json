@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node --test",
-    "ts:login": "tsc 01-javascript-typescript/typescript/login.ts --strict --target es2022 --module commonjs --outDir 01-javascript-typescript/typescript/dist && node 01-javascript-typescript/typescript/dist/login.js"
+    "ts:login": "tsc 01-javascript-typescript/typescript/login.ts --strict --target es2022 --module commonjs --outDir 01-javascript-typescript/typescript/dist && node 01-javascript-typescript/typescript/dist/login.js",
+    "checkpoint": "tsc 01-javascript-typescript/checkpoint/userApiCheck.ts --strict --target es2022 --module commonjs --outDir 01-javascript-typescript/checkpoint/dist && node 01-javascript-typescript/checkpoint/dist/userApiCheck.js"
   },
   "repository": {
     "type": "git",
