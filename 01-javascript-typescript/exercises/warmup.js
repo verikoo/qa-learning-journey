@@ -26,15 +26,15 @@ function wait(ms) {
 // An async function ALWAYS returns a Promise, even if we return plain text.
 
 async function fakeLogin(username, password) {
-     // Guard: reject invalid input types early with a clear error.
+    // Guard: reject invalid input types early with a clear error.
     // Empty strings are valid input (handled below with user-facing messages);
     // non-strings indicate a bug in the calling code.
     if (typeof username !== 'string' || typeof password !== 'string') {
         throw new TypeError('Username and password must be strings');
     }
-     const normalizedUsername = username.toLowerCase();
+    const normalizedUsername = username.toLowerCase();
 
-    if (normalizedUsername  === '' && password === '') {
+    if (normalizedUsername === '' && password === '') {
         return 'Username and password are required';
     }
 

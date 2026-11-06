@@ -4,7 +4,8 @@
   "description": "Oct 30, 2026 · @veriko",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "ts:login": "tsc 01-javascript-typescript/typescript/login.ts --strict --target es2022 --module commonjs --outDir 01-javascript-typescript/typescript/dist && node 01-javascript-typescript/typescript/dist/login.js"
   },
   "repository": {
     "type": "git",

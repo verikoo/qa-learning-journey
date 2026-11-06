@@ -3,7 +3,7 @@
 // Types are checked by the compiler before any code runs.
 
 
-interface TestUser{
+interface TestUser {
     name: string;
     username: string;
     password: string;
@@ -11,63 +11,63 @@ interface TestUser{
 }
 
 function wait(ms: number): Promise<void> {
-    return new Promise((resolve)=>setTimeout(resolve,ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fakeLogin(username:string,password:string): Promise<string>{
+async function fakeLogin(username: string, password: string): Promise<string> {
     const normalizedUsername = username.toLowerCase();
 
-    if (normalizedUsername==='' && password ===''){
+    if (normalizedUsername === '' && password === '') {
         return 'Username and password are required';
     }
 
-    if(normalizedUsername===''){
+    if (normalizedUsername === '') {
         return 'Username is required';
     }
 
-    if(password===''){
+    if (password === '') {
         return 'Password is required';
     }
-       
+
     await wait(1000);
 
-    
-    if(normalizedUsername==='admin' && password==='1234'){
+
+    if (normalizedUsername === 'admin' && password === '1234') {
         return 'Login successful';
     }
-    
-    return 	'Invalid credentials';
+
+    return 'Invalid credentials';
 }
 
-class LoginPage{
-    username: string ='';
-    password: string ='';
-    message:  string ='';
+class LoginPage {
+    username: string = '';
+    password: string = '';
+    message: string = '';
 
-    fillUsername(value:string): void{
+    fillUsername(value: string): void {
         this.username = value
     }
 
-    fillPassword(value:string): void{
+    fillPassword(value: string): void {
         this.password = value
     }
 
-    async clickLoginButton(): Promise<void>{
+    async clickLoginButton(): Promise<void> {
         this.message = await fakeLogin(this.username, this.password);
     }
 
-    getMessage(): string{
+    getMessage(): string {
         return this.message;
     }
 
-    async login(username:string, password:string): Promise<void>{
+    async login(username: string, password: string): Promise<void> {
         this.fillUsername(username);
         this.fillPassword(password);
         await this.clickLoginButton();
     }
 }
 
-const testUsers: TestUser[] =[
+const testUsers: TestUser[] = [
     {
         name: 'Valid admin',
         username: 'admin',
@@ -97,19 +97,21 @@ const testUsers: TestUser[] =[
     }
 ];
 
-    async function main(): Promise<void> {
-        for (const user of testUsers) {
-            const loginPage = new LoginPage();
-            await loginPage.login(user.username, user.password);
+async function main(): Promise<void> {
+    for (const user of testUsers) {
+        const loginPage = new LoginPage();
+        await loginPage.login(user.username, user.password);
 
-            const actual= loginPage.getMessage();
-            const status = actual === user.expected ? 'PASS' : 'FAIL';
-            console.log(`${status}: ${user.name} -> "${actual}"`);
+        const actual = loginPage.getMessage();
+        const status = actual === user.expected ? 'PASS' : 'FAIL';
+        console.log(`${status}: ${user.name} -> "${actual}"`);
 
-      
-        }
+
     }
+}
 
-    main();
 
-export {};
+
+main();
+
+export { };
