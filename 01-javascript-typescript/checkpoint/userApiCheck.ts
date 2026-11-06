@@ -119,7 +119,6 @@ async function main(): Promise<void> {
 
     try {
         const users = await client.getUsers();
-        //  users[0].address.geo.lat = '999'; // TEMPORARY: fake bad data to test our checks. Delete after!
         console.log(`Fetched ${users.length} users\n`);
 
         let passed = 0;
