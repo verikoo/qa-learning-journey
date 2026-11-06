@@ -7,8 +7,8 @@ class LoginPage {
     constructor() {
         // Initial state of a freshly opened login page
         this.username = '',
-        this.password = '',
-        this.message = ''
+            this.password = '',
+            this.message = ''
     }
 
     /**
@@ -18,33 +18,33 @@ class LoginPage {
 
     fillUsername(value) {
         this.username = value;
-  }
+    }
 
-   /**
-   * Types a value into the password field.
-   * @param {string} value
-   */
+    /**
+    * Types a value into the password field.
+    * @param {string} value
+    */
 
     fillPassword(value) {
-    this.password = value;
-  }
+        this.password = value;
+    }
 
-  /**
-   * Submits the form and stores the server response as the page message.
-   */
+    /**
+     * Submits the form and stores the server response as the page message.
+     */
 
-  async clickLogin(){
-    this.message = await fakeLogin(this.username, this.password);
-  }
+    async clickLogin() {
+        this.message = await fakeLogin(this.username, this.password);
+    }
 
-   /**
-   * Returns the message currently shown on the page.
-   * @returns {string}
-   */
+    /**
+    * Returns the message currently shown on the page.
+    * @returns {string}
+    */
 
-   getMessage(){
-    return this.message;
-   }
+    getMessage() {
+        return this.message;
+    }
 
 
     /**
@@ -54,7 +54,7 @@ class LoginPage {
    * @param {string} password
    */
 
-    async login(username, password){
+    async login(username, password) {
         this.fillUsername(username);
         this.fillPassword(password);
         await this.clickLogin();

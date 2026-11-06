@@ -13,12 +13,12 @@ const { fakeLogin } = require('./warmup'); // the function we are testing
 // Each object = one scenario: a readable name, the inputs, and the expected result.
 // To add a new scenario, just add a new line here. No new test code needed!
 const testUsers = [
-  { name: 'Valid admin',    username: 'admin', password: '1234',  expected: 'Login successful' },
+  { name: 'Valid admin', username: 'admin', password: '1234', expected: 'Login successful' },
   { name: 'Wrong password', username: 'admin', password: 'wrong', expected: 'Invalid credentials' },
-  { name: 'Unknown user',   username: 'guest', password: '1234',  expected: 'Invalid credentials' },
-  { name: 'Empty username', username: '',      password: '1234',  expected: 'Username is required' },
-  { name: 'Empty password', username: 'admin', password: '',      expected: 'Password is required' },
-  { name: 'Empty fields',   username: '',      password: '',      expected: 'Username and password are required' },
+  { name: 'Unknown user', username: 'guest', password: '1234', expected: 'Invalid credentials' },
+  { name: 'Empty username', username: '', password: '1234', expected: 'Username is required' },
+  { name: 'Empty password', username: 'admin', password: '', expected: 'Password is required' },
+  { name: 'Empty fields', username: '', password: '', expected: 'Username and password are required' },
   { name: 'Uppercase username', username: 'ADMIN', password: '1234', expected: 'Login successful' },
   { name: 'Password with trailing space', username: 'admin', password: '1234 ', expected: 'Invalid credentials' },
 ];

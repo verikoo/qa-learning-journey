@@ -11,13 +11,13 @@ const { fakeLogin } = require('./warmup');
 // const = this variable name will never point to something else
 //         (but we could still change what's INSIDE the array)
 const testUsers = [
-  { name: 'Valid admin',    username: 'admin', password: '1234',  expected: 'Login successful' },
+  { name: 'Valid admin', username: 'admin', password: '1234', expected: 'Login successful' },
   { name: 'Wrong password', username: 'admin', password: 'wrong', expected: 'Invalid credentials' },
-  { name: 'Unknown user',   username: 'guest', password: '1234',  expected: 'Invalid credentials' },
-  { name: 'Empty username', username: '',      password: '1234',  expected: 'Username is required' },
-  { name: 'Empty password', username: 'admin', password: '',      expected: 'Password is required' },
-  { name: 'Empty fields', username:'', password:'', expected: 'Username and password are required'},
-  { name:'Valid admin 2', username:'ADMIN', password:'1234', expected:'Login successful'}
+  { name: 'Unknown user', username: 'guest', password: '1234', expected: 'Invalid credentials' },
+  { name: 'Empty username', username: '', password: '1234', expected: 'Username is required' },
+  { name: 'Empty password', username: 'admin', password: '', expected: 'Password is required' },
+  { name: 'Empty fields', username: '', password: '', expected: 'Username and password are required' },
+  { name: 'Valid admin 2', username: 'ADMIN', password: '1234', expected: 'Login successful' }
 ];
 
 // --- 2. Run every user through fakeLogin and compare results ---
