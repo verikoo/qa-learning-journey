@@ -159,3 +159,7 @@ Priority: **what users see → test id → CSS/XPath as last resort**
 - GET: `await fetch(url).then(r => r.json())`
 - Status only: `await fetch(url).then(r => r.status)`
 - POST: `fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })`
+
+- The server sets `rack.session` (HttpOnly) even for a WRONG password: the session also stores
+  the error message for the next page. So "a cookie was set" does not prove login either
+- `optimizely...` cookies = analytics / A/B testing, unrelated to login (noise)
