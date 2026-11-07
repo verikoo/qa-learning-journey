@@ -113,3 +113,49 @@ Priority: **what users see → test id → CSS/XPath as last resort**
 - **Selector** = an address pointing to elements in the DOM
 - **`aria-label`** = accessibility label for screen readers; Playwright uses it too
 - A misspelled property returns `undefined` instead of an error, so typos can hide
+
+
+
+## Exercise 3: Network tab & HTTP
+
+### Page load (saucedemo)
+- Reloading a page sends many requests: the HTML page, scripts (JS), styles (CSS), images, fonts
+- Filters: Doc = the page, JS = scripts, CSS = styles, Img = images, Fetch/XHR = data requests to APIs
+
+### Login & cookies (saucedemo)
+- No request was sent with the username/password: SauceDemo checks login in the browser
+  (practice app only; real apps send a POST to a server, never check passwords in the browser)
+- Login is stored in a cookie: `session-username` = `standard_user`
+- Deleting the cookie + reload → sent back to the login page (session lost)
+- A session cookie is the "proof of login"; real apps store a random token (HttpOnly), not the username
+- Playwright can save cookies after one login and reuse them in all tests (faster)
+
+### My own requests (jsonplaceholder, from the Console)
+- GET /users/1 → 200, user "Leanne Graham" with nested address and company objects
+- POST /posts → 201 Created (not 200!), new id: 101
+- GET /posts/101 → 404: JSONPlaceholder fakes saving (writes are not stored)
+- GET /users/999 → 404 (the red Console line is the browser logging a failed request, not a crash)
+- Console warnings from browser extensions (like "No ad placements found") are noise: ignore them
+
+### Lessons
+- Check the EXACT status code: 201 for create, 200 for read
+- A success response is not proof: create → read back → compare
+- An empty Network list can be a finding too (no login request = client-side login)
+
+## 8. HTTP basics
+- **Request** = method + URL + headers (+ body); **Response** = status + headers + body
+- **GET** read · **POST** create · **PUT/PATCH** update · **DELETE** remove
+- **2xx** success · **3xx** redirect · **4xx** client mistake · **5xx** server bug
+- 200 OK · 201 Created · 204 No Content · 401 not logged in · 403 forbidden · 404 not found · 500 server error
+- `Content-Type` = body format · `Cookie`/`Set-Cookie` = stored session data · `Authorization` = token
+
+## 9. Network tab tips
+- **Fetch/XHR** filter = data requests only
+- **Clear** 🚫 before an action, so you only see that action's requests
+- Click a request: **Headers** (method, status), **Payload** (what you sent), **Response** (what came back)
+- Application tab → Cookies → expand ▶ and click the site to see cookies
+
+## 10. fetch in the Console
+- GET: `await fetch(url).then(r => r.json())`
+- Status only: `await fetch(url).then(r => r.status)`
+- POST: `fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })`
