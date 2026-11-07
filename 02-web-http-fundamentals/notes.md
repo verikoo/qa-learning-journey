@@ -1,8 +1,12 @@
-# Phase 2 Notes
+# Phase 2 Notes: Web & HTTP Fundamentals
 
-## Exercise 1: DOM and DevTools (saucedemo.com)
+Practice site: https://www.saucedemo.com (user: `standard_user`, password: `secret_sauce`)
 
-### Login page elements
+---
+
+# Part A: Exercise logs
+
+## Exercise 1: DOM and DevTools (login page)
 
 | Element | Tag | id | data-test | Other attributes |
 | --- | --- | --- | --- | --- |
@@ -10,28 +14,76 @@
 | Password field | `input` | `password` | `password` | type="password", name="password", placeholder="Password", aria-label="Password" |
 | Login button | `input` (not `button`!) | `login-button` | `login-button` | type="submit", value="Login", name="login-button", class="submit-button btn_action" |
 
-- Number of `<input>` elements on the page: 3 (username, password, login button)
-- Test usernames: standard_user, locked_out_user, problem_user, ... (see bottom of login page)
-- Test password: secret_sauce
+- 3 `<input>` elements on the page (username, password, login button)
+- Test usernames: standard_user, locked_out_user, problem_user, ... (listed at the bottom of the login page)
+- The login button is `<input type="submit">`, but browsers and Playwright treat it as a **button** named by its `value` ("Login")
 
-### Key concepts
-- **HTML** = the text the server sends that describes the page (tags + attributes)
-- **DOM** = the tree of elements the browser builds from HTML; Playwright searches this tree
-- **`#id`** selector finds an element by its `id`
-- **`[data-test="..."]`** selector finds an element by any attribute
-- **`querySelector`** returns the first match; **`querySelectorAll`** returns all matches
-- **`aria-label`** = accessibility label for screen readers; Playwright can use it (`getByLabel`)
-- A misspelled property returns `undefined` instead of an error, so typos can hide
+## Exercise 2: Selectors (products page)
 
+- Products (`.inventory_item`): 6
+- Names: Sauce Labs Backpack, Sauce Labs Bike Light, Sauce Labs Bolt T-Shirt, Sauce Labs Fleece Jacket, Sauce Labs Onesie, Test.allTheThings() T-Shirt (Red)
+- Prices: $29.99, $9.99, $15.99, $49.99, $7.99, $15.99
+- Add to cart buttons (`[data-test^="add-to-cart"]`): 6 before clicking, 5 after adding Backpack
+- After clicking Backpack: button text → "Remove", its data-test → `remove-sauce-labs-backpack`, cart badge → "1"
+- 2nd product price: before sorting $9.99 / after "Price (low to high)" also $9.99 (coincidence!) / after "Price (high to low)" $29.99
+- `$x('//button[text()="Add to cart"]')` after adding Backpack: 5
 
-### Which attribute to use in tests?
-- `data-test` exists only for testing: developers promise not to change it
-- `class` is for styling and changes often: avoid it
-- Playwright priority: role/label (what users see) → test id → CSS as last resort
-- User-facing locators also catch visible bugs (missing text, wrong labels)
+**Lessons**
+- One `^=` selector can match a whole group of elements that share a naming pattern
+- The same element can change attributes and text after an action (Add to cart → Remove)
+- Position-based selectors (`nth-child`) break when order changes, and coincidences can hide this, so test more than one case
+- Text-based selectors break when text changes
 
-### Attribute stability ranking (most → least stable)
+---
 
+# Part B: Reference (reuse everywhere)
+
+## 1. DevTools shortcuts
+| Shortcut | Opens |
+| --- | --- |
+| `Cmd + Option + I` | DevTools |
+| `Cmd + Option + J` | DevTools directly on the Console |
+| Right-click → Inspect | Jumps to that element in Elements tab |
+| `Cmd + Shift + C` | Element picker: click anything on the page to inspect it |
+
+## 2. Console commands
+| Command | What it does |
+| --- | --- |
+| `document.querySelector('sel')` | First element matching a CSS selector (or `null`) |
+| `document.querySelectorAll('sel')` | All matching elements |
+| `document.querySelectorAll('sel').length` | How many match |
+| `[...document.querySelectorAll('sel')].map(el => el.textContent)` | Array of all their texts |
+| `$('sel')` / `$$('sel')` | Chrome shortcuts for querySelector / querySelectorAll |
+| `$x('xpath')` | Find elements with XPath |
+| `$0` | The element currently selected in the Elements tab |
+| `el.textContent` | The element's text |
+| `el.value` | Current value of an input field (read or set) |
+| `el.getAttribute('data-test')` | Read any attribute |
+| `el.click()` | Click it with code |
+| `copy(something)` | Copy a result to the clipboard |
+
+## 3. CSS selectors
+| Selector | Finds... | Example |
+| --- | --- | --- |
+| `tag` | All elements with that tag | `button` |
+| `#id` | The element with that id | `#login-button` |
+| `.class` | Elements with that class | `.inventory_item` |
+| `[attr="value"]` | Exact attribute match | `[data-test="username"]` |
+| `[attr^="value"]` | Attribute **starts with** | `[data-test^="add-to-cart"]` |
+| `[attr*="value"]` | Attribute **contains** | `[data-test*="backpack"]` |
+| `A B` (space) | B **anywhere inside** A | `.inventory_item .inventory_item_price` |
+| `A > B` | B **directly inside** A | `.inventory_list > div` |
+| `:nth-child(n)` | n-th child (fragile: depends on order!) | `.inventory_item:nth-child(2)` |
+
+## 4. XPath basics
+| XPath | Finds... |
+| --- | --- |
+| `//button` | All buttons anywhere |
+| `//button[text()="Add to cart"]` | Buttons with exactly this text |
+| `//div[contains(text(), "Backpack")]` | Divs whose text **contains** "Backpack" |
+| `//*[@data-test="username"]` | Any element with that attribute (`@` = attribute) |
+
+## 5. Attribute stability (most → least stable)
 | Attribute | Stability | Why |
 | --- | --- | --- |
 | `data-test` / `data-testid` | ⭐⭐⭐ Most stable | Made **only** for tests |
@@ -39,4 +91,25 @@
 | `id` | ⭐⭐ Usually stable | Developers may rename it |
 | `name` | ⭐⭐ Usually stable | Used for form data, rarely renamed |
 | `placeholder` | ⭐ Fragile | Text tweaks, translations |
-| `class` | ❌ Least stable | Pure styling: redesigns change it constantly (and `input_error` showed classes can even be misleading!) |
+| `class` | ❌ Least stable | Pure styling: redesigns change it constantly (and can be misleading, like `input_error`) |
+
+## 6. Playwright locators (coming in Phase 3)
+Priority: **what users see → test id → CSS/XPath as last resort**
+
+| Console / CSS | Playwright locator |
+| --- | --- |
+| `input[type="submit"][value="Login"]` | `page.getByRole('button', { name: 'Login' })` |
+| `[aria-label="Username"]` | `page.getByLabel('Username')` |
+| `[placeholder="Username"]` | `page.getByPlaceholder('Username')` |
+| `$x('//div[text()="Sauce Labs Backpack"]')` | `page.getByText('Sauce Labs Backpack')` |
+| `[data-test="username"]` | `page.getByTestId('username')` * |
+| `.inventory_item` | `page.locator('.inventory_item')` (last resort) |
+
+\* Playwright's `getByTestId` looks for `data-testid` by default. SauceDemo uses `data-test`, so it needs one config setting. We'll do that in Phase 3.
+
+## 7. Key concepts
+- **HTML** = text the server sends that describes the page (tags + attributes)
+- **DOM** = tree of elements the browser builds from HTML; Playwright searches this tree
+- **Selector** = an address pointing to elements in the DOM
+- **`aria-label`** = accessibility label for screen readers; Playwright uses it too
+- A misspelled property returns `undefined` instead of an error, so typos can hide
