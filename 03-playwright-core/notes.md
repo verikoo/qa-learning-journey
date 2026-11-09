@@ -147,3 +147,30 @@ Result: 3 passed (chromium)
   then `toHaveCount(1)` before `toHaveText(...)`
 - Rule: a changed URL is not proof the new page is ready
 - `aka getByTestId(...)` in errors = Playwright suggests unique alternative locators
+
+
+
+## Exercise 5: Evidence for failed tests (screenshots, videos, traces)
+
+### Config (playwright.config.ts → use)
+- `screenshot: 'only-on-failure'` → picture of the page when a test fails
+- `video: 'retain-on-failure'` → records every test, keeps the video only on failure
+- `trace: 'retain-on-failure'` → keeps a full trace on failure
+- Replaced `trace: 'on-first-retry'`: locally retries = 0, so it never recorded anything
+
+### Why
+- On CI, tests run with nobody watching: evidence shows WHAT happened without re-running
+- "Only on failure" saves time and disk space: passing tests need no evidence
+
+### Where to find it
+- HTML report (`npx playwright show-report`) → failed test → scroll down: Screenshots, Videos, Traces
+- Files in `test-results/<test-folder>/`: `.png` screenshot, `.webm` video, `trace.zip`
+- Open a trace directly: `npx playwright show-trace test-results/<folder>/trace.zip`
+- `test-results/` is in `.gitignore`: generated files are never committed
+
+### Reading the failure
+- `Expected substring: "$32.40"` vs `Received string: "Total: $32.39"` (`toContainText` = substring check)
+- `Timeout: 5000ms` = expect retried for 5s before failing
+- Test Steps show which `test.step` failed; later steps never run
+- Trace Viewer = UI Mode saved to a file: actions, before/after snapshots, network, console, errors
+- `error-context.md` = text summary of the error + page structure: useful for AI tools (Phase 8)
