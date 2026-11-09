@@ -1,39 +1,37 @@
 // login.spec.ts
-// Login tests for SauceDemo: one happy path and two negative cases.
+// Login tests for SauceDemo, using the LoginPage page object.
+
 
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
 
 test.describe('Login', () => {
 
-    test('valid user can log in', async ({ page }) => {
-        await page.goto('/');
+    let loginPage: LoginPage;
 
-        await page.getByLabel('username').fill('standard_user');
-        await page.getByLabel('password').fill('secret_sauce');
-        await page.getByRole('button', { name: 'Login' }).click();
+    test.beforeEach(async ({ page }) => {
+        loginPage = new LoginPage(page);
+        await loginPage.goto();
+    });
+
+    test('valid user can log in', async ({ page }) => {
+
+        await loginPage.login('standard_user', 'secret_sauce');
 
         await expect(page).toHaveURL(/inventory\.html/);
         await expect(page.getByTestId('title')).toHaveText('Products');
     });
 
-    test('locked out user cannot log in', async ({ page }) => {
-        await page.goto('/');
+    test('locked out user cannot log in', async () => {
+        await loginPage.login('locked_out_user', 'secret_sauce');
 
-        await page.getByLabel('username').fill('locked_out_user');
-        await page.getByLabel('password').fill('secret_sauce');
-        await page.getByRole('button', { name: 'Login' }).click();
-
-        await expect(page.getByTestId('error')).toContainText('locked out');
+        await expect(loginPage.errorMessage).toContainText('locked out');
     });
 
     test('Wrong password shows error', async ({ page }) => {
-        await page.goto('/');
+        await loginPage.login('standard_user', 'wrong_password');
 
-        await page.getByLabel('username').fill('standard_user');
-        await page.getByLabel('password').fill('wrong_password');
-        await page.getByRole('button', { name: 'Login' }).click();
-
-        await expect(page.getByTestId('error')).toContainText('do not match');
+        await expect(loginPage.errorMessage).toContainText('do not match');
         await expect(page).toHaveURL('/');
 
     })

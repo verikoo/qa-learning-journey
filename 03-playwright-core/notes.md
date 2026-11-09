@@ -195,3 +195,7 @@ Result: 9 passed (chromium)
 - `interface` describes the shape of each scenario (TypeScript catches typos in test data)
 - Security checks: masked password field, protected pages without a session
 - One file combines Phases 1–3: TS interfaces, arrays/loops, locators, assertions, beforeEach
+
+- Logout on SauceDemo is `getByRole('button', { name: 'Logout' })`, not 'link'
+- Never assume a role from how an element LOOKS (or from memory): verify with Pick locator or Inspect
+- When a test fails, trust the evidence (error + Pick locator) over your expectations
