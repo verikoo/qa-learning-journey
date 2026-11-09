@@ -174,3 +174,24 @@ Result: 3 passed (chromium)
 - Test Steps show which `test.step` failed; later steps never run
 - Trace Viewer = UI Mode saved to a file: actions, before/after snapshots, network, console, errors
 - `error-context.md` = text summary of the error + page structure: useful for AI tools (Phase 8)
+
+
+
+## Phase 3 Checkpoint: Login checklist (tests/login-checklist.spec.ts)
+
+Result: 9 passed (chromium)
+
+| # | Check | How |
+| --- | --- | --- |
+| 1–5 | Empty username / empty password / both empty / wrong password / locked user | Data-driven: array of scenarios + `for...of` creating one test each |
+| 6 | Password field hides text | `toHaveAttribute('type', 'password')` |
+| 7 | Error can be closed | click `error-button` → error `toBeHidden()` |
+| 8 | Logout returns to login | Open Menu → Logout → URL '/' + Login button visible |
+| 9 | Products blocked when logged out | `goto('/inventory.html')` → back to '/' + error "when you are logged in" |
+
+### Key ideas
+- Data-driven in Playwright = Phase 1 pattern: `for (const s of data) { test(\`name ${s.name}\`, ...) }`
+- Test names must be UNIQUE: use a template literal with the scenario name
+- `interface` describes the shape of each scenario (TypeScript catches typos in test data)
+- Security checks: masked password field, protected pages without a session
+- One file combines Phases 1–3: TS interfaces, arrays/loops, locators, assertions, beforeEach
