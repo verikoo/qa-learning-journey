@@ -1,45 +1,29 @@
 // products.spec.ts
-// Tests for the SauceDemo products page: list, cart, and sorting.
-import { test, expect } from '@playwright/test';
+// Tests for the SauceDemo products page, using custom fixtures.
+
+import { test, expect } from '../fixtures/pages';
 
 test.describe('Products Page', () => {
-    // Runs before EACH test in this group: every test starts logged in
-    test.beforeEach(async ({ page }) => {
-        await page.goto('/');
-        await page.getByLabel('Username').fill('standard_user');
-        await page.getByLabel('Password').fill('secret_sauce');
-        await page.getByRole('button', { name: 'Login' }).click();
-        await expect(page).toHaveURL(/inventory\.html/);
-
+    test('shows 6 products', async ({ inventoryPage }) => {
+        await expect(inventoryPage.productNames).toHaveCount(6);
     });
 
-    test('shows 6 product', async ({ page }) => {
-        await expect(page.getByTestId('inventory-item-name')).toHaveCount(6);
+    test('adding and removing a product updates the cart badge', async ({ inventoryPage }) => {
+        await inventoryPage.addToCart('sauce-labs-backpack');
 
+        await expect(inventoryPage.cartBadge).toHaveText('1');
+        await expect(inventoryPage.removeButton('sauce-labs-backpack')).toBeVisible();
+
+        await inventoryPage.removeFromCart('sauce-labs-backpack');
+
+        await expect(inventoryPage.cartBadge).toBeHidden();
     });
 
-    test('adding and removing product updates the cart badge', async ({ page }) => {
-        const cartBadge = page.getByTestId('shopping-cart-badge');
+    test('sorting by price low to high orders the prices', async ({ inventoryPage }) => {
+        await inventoryPage.sortBy('Price (low to high)');
 
-        await page.getByTestId('add-to-cart-sauce-labs-backpack').click();
+        const prices = await inventoryPage.getPrices();
 
-        await expect(cartBadge).toHaveText('1');
-        await expect(page.getByTestId('remove-sauce-labs-backpack')).toBeVisible();
-
-        await page.getByTestId('remove-sauce-labs-backpack').click();
-
-        await expect(cartBadge).toBeHidden();
-
+        expect(prices).toEqual([...prices].sort((a, b) => a - b));
     });
-
-    test('sorting by price low to high orders the prices correctly', async ({ page }) => {
-        await page.getByRole('combobox').selectOption({ label: 'Price (low to high)' });
-
-        const priceTexts = await page.getByTestId('inventory-item-price').allTextContents();
-        const prices = priceTexts.map((text) => parseFloat(text.replace('$', '')));
-        const sortedPrices = [...prices].sort((a, b) => a - b);
-
-        expect(prices).toEqual(sortedPrices);
-    });
-
 });

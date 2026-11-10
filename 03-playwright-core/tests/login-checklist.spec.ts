@@ -2,6 +2,7 @@
 // Phase 3 checkpoint: a QA login checklist for SauceDemo, using the LoginPage page object.
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
+import { InventoryPage } from '../pages/InventoryPage';
 
 interface InvalidLogin {
     name: string;
@@ -53,15 +54,15 @@ test.describe('Login checklist', () => {
 
     // Check 8
     test('logout returns to the login page', async ({ page }) => {
-        await loginPage.login('standard_user', 'secret_sauce');
-        await expect(page).toHaveURL(/inventory\.html/);
+        const inventoryPage = new InventoryPage(page);
 
-        await page.getByRole('button', { name: 'Open Menu' }).click();
-        await page.getByRole('button', { name: 'Logout' }).click();
+        await loginPage.login('standard_user', 'secret_sauce');
+        await expect(inventoryPage.title).toHaveText('Products');
+
+        await inventoryPage.logout();
 
         await expect(page).toHaveURL('/');
         await expect(loginPage.loginButton).toBeVisible();
-
     });
 
     // check 9

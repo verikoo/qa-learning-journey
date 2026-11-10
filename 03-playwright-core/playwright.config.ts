@@ -3,9 +3,13 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
+ * 
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
+
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+// Load .env from this project folder into process.env
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 // dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 /**
@@ -25,8 +29,8 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-       /* Base URL so tests can use page.goto('/') */
-    baseURL: 'https://www.saucedemo.com',
+    /* Base URL so tests can use page.goto('/') */
+    baseURL: process.env.BASE_URL,
 
     /* SauceDemo uses data-test="..." instead of the default data-testid */
     testIdAttribute: 'data-test',

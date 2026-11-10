@@ -199,3 +199,97 @@ Result: 9 passed (chromium)
 - Logout on SauceDemo is `getByRole('button', { name: 'Logout' })`, not 'link'
 - Never assume a role from how an element LOOKS (or from memory): verify with Pick locator or Inspect
 - When a test fails, trust the evidence (error + Pick locator) over your expectations
+
+- `await test.step('name', async () => { ... })` = a named chapter inside a test
+- Doesn't change behavior: actions run immediately, top to bottom
+- Shows in reports, UI Mode and traces as grouped, named stages
+- Failure reports say WHICH business step broke ("Verify order total")
+- Use for long, multi-stage tests (E2E flows); skip for short tests
+
+# Phase 4 Notes: Test Architecture
+
+## Exercise 1: Page Object Model, LoginPage
+- POM = one class per page: locators defined ONCE + methods for user actions
+- Same idea as Phase 1's fake LoginPage, but controlling a real browser
+- Rules: locators live in the page object · methods = user actions · assertions stay in tests
+- `import { type Page, type Locator } from '@playwright/test'` = types for page and locators
+- `readonly` = set once in the constructor, never reassigned
+- `export class` + `import { LoginPage } from '../pages/LoginPage'` (`../` = up one folder)
+- Break-it proof: one wrong locator broke all 3 tests; one fix healed all 3
+- SauceDemo Logout is a `button` role, not `link`: verify roles with Pick locator, never assume
+
+## Exercise 2: Full set of page objects
+| Page object | Holds |
+| --- | --- |
+| `LoginPage` | inputs, Login button, error, `goto()`, `login()` |
+| `InventoryPage` | title, names, prices, cart badge/link, sort, menu, `addToCart()`, `sortBy()`, `getPrices()`, `logout()` |
+| `CartPage` | title, item names, `checkout()` |
+| `CheckoutPage` | shipping form, totals, Finish, confirmation, `fillShippingInfo()`, `finish()` |
+
+### Key ideas
+- Methods can BUILD locators from a parameter: `addToCartButton(slug)` → `add-to-cart-${slug}`
+- Methods can RETURN data: `getPrices(): Promise<number[]>`
+- `async` + `Promise<void>` only for methods that talk to the browser (click, fill, select, read)
+- Methods that only build a locator are NOT async: a locator is just a description (an address on paper)
+- `Promise<void>` = finishes later, returns nothing · `Promise<number[]>` = finishes later, returns numbers
+- `let page object` declared in `describe` (big room) so all tests see it; assigned fresh in `beforeEach`
+- `{ page }` only when the test uses `page` directly; otherwise `async () =>`
+- `{ label }` = shorthand for `{ label: label }`
+- `test.step` = named chapters in long tests; failure reports show WHICH business step broke
+
+### Debugging lesson
+- Two methods got merged while typing (`removeFromCart` had `sortBy`'s body): valid TypeScript, wrong logic
+- Autocomplete is a live check: if a method doesn't appear in suggestions, it doesn't exist (or isn't saved)
+
+
+## Exercise 3: Custom fixtures (fixtures/pages.ts)
+
+- A fixture = something Playwright prepares and hands to a test (like `{ page }`)
+- Custom fixtures give tests ready-made page objects: `async ({ inventoryPage }) => ...`
+- No more `let`, `beforeEach`, `new` in every file
+- Tests import from `'../fixtures/pages'` instead of `'@playwright/test'`
+
+### Shape of a fixture
+    myFixture: async ({ page, otherFixture }, use) => {
+      // setup (like beforeEach)
+      await use(theThing);   // hand it to the test; the test runs here
+      // teardown (like afterEach), optional
+    }
+
+### Key ideas
+- `import { test as base }` → `base.extend<PageFixtures>({ ... })` → `export const test`
+- `type PageFixtures = { ... }` describes fixture names + types (autocomplete works)
+- Fixtures can depend on other fixtures: `inventoryPage` uses `page` + `loginPage`
+- `inventoryPage` fixture logs in automatically: you can't be on the products page without logging in
+- Login tests use `loginPage` (NOT `inventoryPage`), since they must start logged out
+- Fixtures work in `beforeEach` too: `test.beforeEach(async ({ loginPage }) => ...)`
+- The `{ ... }` of a test lists exactly its ingredients
+
+
+## Exercise 4: Test data and environment config
+
+### Files
+| File | Contains | In Git? |
+| --- | --- | --- |
+| `.env` | Real values: BASE_URL, users, PASSWORD | ❌ ignored (`.gitignore` line `.env`) |
+| `.env.example` | Same names, empty values (template for teammates) | ✅ (`!.env.example` = exception rule) |
+| `test-data/users.ts` | Users built from env variables | ✅ |
+| `test-data/products.ts` | Shared product data (slug, name, price) | ✅ |
+
+### Key ideas
+- Secrets never go in code: code goes to GitHub, with its history forever
+- `dotenv` reads `.env` into `process.env` (in playwright.config.ts with `dotenv.config({ path: ... })`)
+- On CI there's no .env: values come from GitHub Secrets, and the code stays the same
+- `requireEnv(name)` guard: missing variable → clear error with the fix (Phase 1 guard idea)
+- `process.env[name]` = read a variable whose name is stored in another variable
+- `.env.example` = "form with empty fields"; a teammate runs `cp .env.example .env` and fills it in
+- In `.gitignore`, `!` = exception ("do NOT ignore this")
+- `injected env (4)` = main process loaded 4 vars; workers show (0) because they inherit them
+- `dotenv.config({ ..., quiet: true })` silences the messages
+
+### Debugging lessons
+- Error from the guard → `.env` had the TEMPLATE content (empty values): check with `cat .env`
+- `%` at the end of `cat` output = file has no final new line (harmless)
+- In zsh, `!` = history: pasting text with `!` gives "event not found"
+- Stack trace: read bottom → top to see the chain of who called whom
+- Several errors? Fix the FIRST one ("No tests found" was only a consequence)
