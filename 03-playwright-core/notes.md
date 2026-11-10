@@ -199,3 +199,44 @@ Result: 9 passed (chromium)
 - Logout on SauceDemo is `getByRole('button', { name: 'Logout' })`, not 'link'
 - Never assume a role from how an element LOOKS (or from memory): verify with Pick locator or Inspect
 - When a test fails, trust the evidence (error + Pick locator) over your expectations
+
+- `await test.step('name', async () => { ... })` = a named chapter inside a test
+- Doesn't change behavior: actions run immediately, top to bottom
+- Shows in reports, UI Mode and traces as grouped, named stages
+- Failure reports say WHICH business step broke ("Verify order total")
+- Use for long, multi-stage tests (E2E flows); skip for short tests
+
+# Phase 4 Notes: Test Architecture
+
+## Exercise 1: Page Object Model, LoginPage
+- POM = one class per page: locators defined ONCE + methods for user actions
+- Same idea as Phase 1's fake LoginPage, but controlling a real browser
+- Rules: locators live in the page object · methods = user actions · assertions stay in tests
+- `import { type Page, type Locator } from '@playwright/test'` = types for page and locators
+- `readonly` = set once in the constructor, never reassigned
+- `export class` + `import { LoginPage } from '../pages/LoginPage'` (`../` = up one folder)
+- Break-it proof: one wrong locator broke all 3 tests; one fix healed all 3
+- SauceDemo Logout is a `button` role, not `link`: verify roles with Pick locator, never assume
+
+## Exercise 2: Full set of page objects
+| Page object | Holds |
+| --- | --- |
+| `LoginPage` | inputs, Login button, error, `goto()`, `login()` |
+| `InventoryPage` | title, names, prices, cart badge/link, sort, menu, `addToCart()`, `sortBy()`, `getPrices()`, `logout()` |
+| `CartPage` | title, item names, `checkout()` |
+| `CheckoutPage` | shipping form, totals, Finish, confirmation, `fillShippingInfo()`, `finish()` |
+
+### Key ideas
+- Methods can BUILD locators from a parameter: `addToCartButton(slug)` → `add-to-cart-${slug}`
+- Methods can RETURN data: `getPrices(): Promise<number[]>`
+- `async` + `Promise<void>` only for methods that talk to the browser (click, fill, select, read)
+- Methods that only build a locator are NOT async: a locator is just a description (an address on paper)
+- `Promise<void>` = finishes later, returns nothing · `Promise<number[]>` = finishes later, returns numbers
+- `let page object` declared in `describe` (big room) so all tests see it; assigned fresh in `beforeEach`
+- `{ page }` only when the test uses `page` directly; otherwise `async () =>`
+- `{ label }` = shorthand for `{ label: label }`
+- `test.step` = named chapters in long tests; failure reports show WHICH business step broke
+
+### Debugging lesson
+- Two methods got merged while typing (`removeFromCart` had `sortBy`'s body): valid TypeScript, wrong logic
+- Autocomplete is a live check: if a method doesn't appear in suggestions, it doesn't exist (or isn't saved)
