@@ -240,3 +240,27 @@ Result: 9 passed (chromium)
 ### Debugging lesson
 - Two methods got merged while typing (`removeFromCart` had `sortBy`'s body): valid TypeScript, wrong logic
 - Autocomplete is a live check: if a method doesn't appear in suggestions, it doesn't exist (or isn't saved)
+
+
+## Exercise 3: Custom fixtures (fixtures/pages.ts)
+
+- A fixture = something Playwright prepares and hands to a test (like `{ page }`)
+- Custom fixtures give tests ready-made page objects: `async ({ inventoryPage }) => ...`
+- No more `let`, `beforeEach`, `new` in every file
+- Tests import from `'../fixtures/pages'` instead of `'@playwright/test'`
+
+### Shape of a fixture
+    myFixture: async ({ page, otherFixture }, use) => {
+      // setup (like beforeEach)
+      await use(theThing);   // hand it to the test; the test runs here
+      // teardown (like afterEach), optional
+    }
+
+### Key ideas
+- `import { test as base }` → `base.extend<PageFixtures>({ ... })` → `export const test`
+- `type PageFixtures = { ... }` describes fixture names + types (autocomplete works)
+- Fixtures can depend on other fixtures: `inventoryPage` uses `page` + `loginPage`
+- `inventoryPage` fixture logs in automatically: you can't be on the products page without logging in
+- Login tests use `loginPage` (NOT `inventoryPage`), since they must start logged out
+- Fixtures work in `beforeEach` too: `test.beforeEach(async ({ loginPage }) => ...)`
+- The `{ ... }` of a test lists exactly its ingredients

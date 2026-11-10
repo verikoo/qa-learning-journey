@@ -1,31 +1,13 @@
 // checkout.spec.ts
 // End-to-end checkout flow: from login to order confirmation.
 
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
-import { InventoryPage } from '../pages/InventoryPage';
-import { CartPage } from '../pages/CartPage';
-import { CheckoutPage } from '../pages/CheckoutPage';
-import { waitForDebugger } from 'node:inspector';
+import { test, expect } from '../fixtures/pages';
 
 test.describe('Checkout', () => {
-    let inventoryPage: InventoryPage;
-    let cartPage: CartPage;
-    let checkoutPage: CheckoutPage;
 
-    test.beforeEach(async ({ page }) => {
-        const loginPage = new LoginPage(page);
-        inventoryPage = new InventoryPage(page);
-        cartPage = new CartPage(page);
-        checkoutPage = new CheckoutPage(page);
 
-        await loginPage.goto();
-        await loginPage.login('standard_user', 'secret_sauce');
-        await expect(inventoryPage.title).toHaveText('Products');
 
-    });
-
-    test('user can buy a product', async ({ page }) => {
+    test('user can buy a product', async ({ page, inventoryPage, cartPage, checkoutPage }) => {
         await test.step('Add backpack to cart', async () => {
             await inventoryPage.addToCart('sauce-labs-backpack');
             await expect(inventoryPage.cartBadge).toHaveText('1');
@@ -61,7 +43,7 @@ test.describe('Checkout', () => {
         });
     });
 
-    test('checkout requires a first name', async ({ page }) => {
+    test('checkout requires a first name', async ({ page, inventoryPage, cartPage, checkoutPage }) => {
         await inventoryPage.addToCart('sauce-labs-backpack');
         await inventoryPage.openCart();
         await cartPage.checkout();
