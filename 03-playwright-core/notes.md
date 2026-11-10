@@ -264,3 +264,32 @@ Result: 9 passed (chromium)
 - Login tests use `loginPage` (NOT `inventoryPage`), since they must start logged out
 - Fixtures work in `beforeEach` too: `test.beforeEach(async ({ loginPage }) => ...)`
 - The `{ ... }` of a test lists exactly its ingredients
+
+
+## Exercise 4: Test data and environment config
+
+### Files
+| File | Contains | In Git? |
+| --- | --- | --- |
+| `.env` | Real values: BASE_URL, users, PASSWORD | ❌ ignored (`.gitignore` line `.env`) |
+| `.env.example` | Same names, empty values (template for teammates) | ✅ (`!.env.example` = exception rule) |
+| `test-data/users.ts` | Users built from env variables | ✅ |
+| `test-data/products.ts` | Shared product data (slug, name, price) | ✅ |
+
+### Key ideas
+- Secrets never go in code: code goes to GitHub, with its history forever
+- `dotenv` reads `.env` into `process.env` (in playwright.config.ts with `dotenv.config({ path: ... })`)
+- On CI there's no .env: values come from GitHub Secrets, and the code stays the same
+- `requireEnv(name)` guard: missing variable → clear error with the fix (Phase 1 guard idea)
+- `process.env[name]` = read a variable whose name is stored in another variable
+- `.env.example` = "form with empty fields"; a teammate runs `cp .env.example .env` and fills it in
+- In `.gitignore`, `!` = exception ("do NOT ignore this")
+- `injected env (4)` = main process loaded 4 vars; workers show (0) because they inherit them
+- `dotenv.config({ ..., quiet: true })` silences the messages
+
+### Debugging lessons
+- Error from the guard → `.env` had the TEMPLATE content (empty values): check with `cat .env`
+- `%` at the end of `cat` output = file has no final new line (harmless)
+- In zsh, `!` = history: pasting text with `!` gives "event not found"
+- Stack trace: read bottom → top to see the chain of who called whom
+- Several errors? Fix the FIRST one ("No tests found" was only a consequence)

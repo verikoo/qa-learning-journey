@@ -6,6 +6,8 @@ import { InventoryPage } from "../pages/InventoryPage";
 import { CartPage } from "../pages/CartPage";
 import { CheckoutPage } from "../pages/CheckoutPage";
 
+import { users } from '../test-data/users';
+
 type PageFixtures = {
     loginPage: LoginPage;
     inventoryPage: InventoryPage;
@@ -20,8 +22,8 @@ export const test = base.extend<PageFixtures>({
 
     inventoryPage: async ({ page, loginPage }, use) => {
         await loginPage.goto();
-        await loginPage.login('standard_user', 'secret_sauce');
-
+        await loginPage.login(users.standard.username, users.standard.password);
+        
         const inventoryPage = new InventoryPage(page);
         await expect(inventoryPage.title).toHaveText('Products');
 

@@ -2,6 +2,7 @@
 // End-to-end checkout flow: from login to order confirmation.
 
 import { test, expect } from '../fixtures/pages';
+import { products } from '../test-data/products';
 
 test.describe('Checkout', () => {
 
@@ -19,7 +20,7 @@ test.describe('Checkout', () => {
             await inventoryPage.openCart();
             await expect(cartPage.title).toHaveText('Your Cart');
             await expect(cartPage.itemNames).toHaveCount(1);
-            await expect(cartPage.itemNames).toHaveText('Sauce Labs Backpack');
+            await expect(cartPage.itemNames).toHaveText(products.backpack.name);
 
             await cartPage.checkout();
             await expect(page).toHaveURL(/checkout-step-one\.html/);
@@ -31,7 +32,7 @@ test.describe('Checkout', () => {
         });
 
         await test.step('Verify order total', async () => {
-            await expect(checkoutPage.subtotalLabel).toContainText('$29.99');
+            await expect(checkoutPage.subtotalLabel).toContainText(products.backpack.price);
             await expect(checkoutPage.taxLabel).toContainText('$2.40');
             await expect(checkoutPage.totalLabel).toContainText('$32.39');
         });
@@ -44,7 +45,7 @@ test.describe('Checkout', () => {
     });
 
     test('checkout requires a first name', async ({ page, inventoryPage, cartPage, checkoutPage }) => {
-        await inventoryPage.addToCart('sauce-labs-backpack');
+        await inventoryPage.addToCart(products.backpack.slug);
         await inventoryPage.openCart();
         await cartPage.checkout();
 

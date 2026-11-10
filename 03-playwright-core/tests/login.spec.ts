@@ -4,6 +4,8 @@
 
 import { test, expect } from '../fixtures/pages';
 
+import { users } from '../test-data/users';
+
 
 test.describe('Login', () => {
 
@@ -13,14 +15,14 @@ test.describe('Login', () => {
 
     test('valid user can log in', async ({ page, loginPage }) => {
 
-        await loginPage.login('standard_user', 'secret_sauce');
+        await loginPage.login(users.standard.username, users.standard.password);
 
         await expect(page).toHaveURL(/inventory\.html/);
         await expect(page.getByTestId('title')).toHaveText('Products');
     });
 
     test('locked out user cannot log in', async ({ loginPage }) => {
-        await loginPage.login('locked_out_user', 'secret_sauce');
+        await loginPage.login(users.lockedOut.username, users.lockedOut.password);
 
         await expect(loginPage.errorMessage).toContainText('locked out');
     });
