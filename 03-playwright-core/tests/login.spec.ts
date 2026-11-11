@@ -15,7 +15,7 @@ test.describe('Login', () => {
         await loginPage.goto();
     });
 
-    test('valid user can log in', async ({ page, loginPage }) => {
+    test('valid user can log in', { tag: '@smoke' }, async ({ page, loginPage }) => {
 
         await loginPage.login(users.standard.username, users.standard.password);
 

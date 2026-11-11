@@ -327,3 +327,29 @@ Result: 9 passed (chromium)
 - Without the empty storageState, "products page is blocked when logged out" failed:
   the test started logged in, so the page was not blocked
 - SauceDemo still shows the login form when logged in, so other login tests passed anyway
+
+## Phase 4 Checkpoint: a clean, consistent framework
+
+- Deleted `example.spec.ts` with `git rm` (deletes + stages the deletion)
+- `login-checklist.spec.ts` now uses fixtures; the logout test uses `new InventoryPage(page)`
+  because the `inventoryPage` fixture assumes the saved session, and this file starts logged out
+- Tags: `test('name', { tag: '@smoke' }, async (...) => ...)` on valid login, 6 products, checkout
+- `--grep @smoke` runs only tagged tests; the setup still runs (dependency!)
+- npm scripts: `test`, `test:chromium`, `test:smoke`, `test:ui`, `report`
+- README.md: setup, run commands, folder structure
+
+### Results
+| Command | Tests | Time |
+| --- | --- | --- |
+| `npm run test:smoke` | 4 (3 smoke + setup) | 3.5s |
+| `npm run test:chromium` | 18 (17 + setup) | 9.6s |
+
+### Final structure
+    03-playwright-core/
+    ├── pages/        LoginPage, InventoryPage, CartPage, CheckoutPage
+    ├── fixtures/     pages.ts (custom fixtures)
+    ├── test-data/    users.ts (from .env), products.ts
+    ├── tests/        auth.setup.ts + 4 spec files
+    ├── .env.example  template (.env is ignored)
+    ├── README.md
+    └── playwright.config.ts
