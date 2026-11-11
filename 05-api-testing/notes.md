@@ -44,3 +44,47 @@
 - Response: Content-Length bigger (adds bookingid), Etag (cache), Nel/Report-To (noise)
 - `X-Powered-By: Express` = security finding: reveals server technology, should be removed
 - Duration ~951ms per request (network trip to Heroku)
+
+
+## Exercise 2: Auth tokens, update & delete
+
+### Restful-Booker auth
+- POST /auth { username, password } → { token }
+- PUT/PATCH/DELETE need the token as a header: `Cookie: token=...`
+- No token → 403 Forbidden
+
+### API client class (api/BookingApi.ts) = POM for APIs
+- Holds `request`; endpoints live in ONE place; methods return APIResponse
+- Assertions stay in tests (same rule as Page Objects)
+- `token?: string` = optional parameter (call without it to test 403)
+- `Promise<string | undefined>`: `|` = OR
+- `Partial<Booking>` = all fields optional (perfect for PATCH)
+- `private` method = only usable inside the class
+- `async` ALLOWS await but doesn't require it; returning a promise is fine
+
+### API fixtures (fixtures/api.ts)
+- `bookingApi`, `authToken`, `createdBookingId`
+- Teardown after `use()`: delete the created booking, leaving no test data behind (shared environment!)
+- `expect(value, 'custom message')` → clearer failures
+- `const { bookingid } = await response.json()` = destructuring
+- Each name needs its own export: `export const test` + `export { expect }`
+
+### Tests
+- Valid credentials → token
+- Update without token → 403
+- Full update (PUT) with token → 200, read back shows the change
+- Partial update (PATCH) → only lastname changed
+- Delete → 201 (quirk! standard is 200/204), then GET → 404
+- `{ ...newBooking, firstname: 'Updated' }` = copy an object and override some fields
+
+### Known bugs with test.fail()
+- `test.fail(true, 'Known bug: ...')` = expected to fail; suite stays green, bug documented
+- If the bug gets fixed → "Expected to fail, but passed" 🔔 → remove test.fail and update the test
+- Bug found: wrong credentials return 200 { reason: "Bad credentials" } instead of 401
+
+### Syntax cheat sheet
+- `:` = "is of type" · `=` = "gets the value" · in objects `key: value`
+- Order: `const name: Type = value`
+- Class methods: `name(params): Type { }` (no =>) · callbacks: `(params) => { }`
+- `;` after imports, const, return, await lines; not after closing } of methods/classes/if
+- Ctrl + Space = force autocomplete suggestions
