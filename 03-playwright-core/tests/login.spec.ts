@@ -5,6 +5,8 @@
 import { test, expect } from '../fixtures/pages';
 
 import { users } from '../test-data/users';
+// These tests check the login itself, so they must start logged OUT
+test.use({ storageState: { cookies: [], origins: [] } });
 
 
 test.describe('Login', () => {
@@ -13,7 +15,7 @@ test.describe('Login', () => {
         await loginPage.goto();
     });
 
-    test('valid user can log in', async ({ page, loginPage }) => {
+    test('valid user can log in', { tag: '@smoke' }, async ({ page, loginPage }) => {
 
         await loginPage.login(users.standard.username, users.standard.password);
 

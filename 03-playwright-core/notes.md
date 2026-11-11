@@ -293,3 +293,63 @@ Result: 9 passed (chromium)
 - In zsh, `!` = history: pasting text with `!` gives "event not found"
 - Stack trace: read bottom → top to see the chain of who called whom
 - Several errors? Fix the FIRST one ("No tests found" was only a consequence)
+
+
+
+## Exercise 5: Saved login state (storageState)
+
+### How it works
+- `tests/auth.setup.ts` logs in ONCE and saves cookies + localStorage:
+  `await page.context().storageState({ path: 'playwright/.auth/user.json' })`
+- Config: a `setup` project (`testMatch: /.*\.setup\.ts/`) + browser projects with
+  `storageState: 'playwright/.auth/user.json'` and `dependencies: ['setup']`
+- `inventoryPage` fixture no longer logs in: it just goes to `/inventory.html`
+- Login tests opt out with an "empty wristband":
+  `test.use({ storageState: { cookies: [], origins: [] } });`
+- `playwright/.auth/` is in `.gitignore`: session files must NEVER be committed
+
+### Key ideas
+- `import { test as setup }` = only a nickname; what makes it a setup is the `.setup.ts`
+  file name + the setup project in the config
+- `page.context()` = the browser profile holding cookies and storage
+- `...devices['Desktop Chrome']` = spread: copy all device settings
+- The saved cookie is `session-username` = `standard_user` (the one I deleted in Phase 2!)
+- SauceDemo sessions expire after 10 minutes (expires − last active = 600s):
+  that's why setup runs fresh at the start of every run
+
+### Measuring
+- Before: 19 tests in 6.8s · After: 20 tests in 9.0s (slower!)
+- Small suite: setup's fixed cost > savings. At scale (500 tests), 1 login instead of 500
+- Other benefits: login bugs only fail login tests; product tests focus on products
+- Lesson: measure, don't assume; optimizations have a break-even point
+
+### Break-it proof
+- Without the empty storageState, "products page is blocked when logged out" failed:
+  the test started logged in, so the page was not blocked
+- SauceDemo still shows the login form when logged in, so other login tests passed anyway
+
+## Phase 4 Checkpoint: a clean, consistent framework
+
+- Deleted `example.spec.ts` with `git rm` (deletes + stages the deletion)
+- `login-checklist.spec.ts` now uses fixtures; the logout test uses `new InventoryPage(page)`
+  because the `inventoryPage` fixture assumes the saved session, and this file starts logged out
+- Tags: `test('name', { tag: '@smoke' }, async (...) => ...)` on valid login, 6 products, checkout
+- `--grep @smoke` runs only tagged tests; the setup still runs (dependency!)
+- npm scripts: `test`, `test:chromium`, `test:smoke`, `test:ui`, `report`
+- README.md: setup, run commands, folder structure
+
+### Results
+| Command | Tests | Time |
+| --- | --- | --- |
+| `npm run test:smoke` | 4 (3 smoke + setup) | 3.5s |
+| `npm run test:chromium` | 18 (17 + setup) | 9.6s |
+
+### Final structure
+    03-playwright-core/
+    ├── pages/        LoginPage, InventoryPage, CartPage, CheckoutPage
+    ├── fixtures/     pages.ts (custom fixtures)
+    ├── test-data/    users.ts (from .env), products.ts
+    ├── tests/        auth.setup.ts + 4 spec files
+    ├── .env.example  template (.env is ignored)
+    ├── README.md
+    └── playwright.config.ts

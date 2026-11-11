@@ -8,7 +8,7 @@ test.describe('Checkout', () => {
 
 
 
-    test('user can buy a product', async ({ page, inventoryPage, cartPage, checkoutPage }) => {
+    test('user can buy a product', { tag: '@smoke' }, async ({ page, inventoryPage, cartPage, checkoutPage }) => {
         await test.step('Add backpack to cart', async () => {
             await inventoryPage.addToCart('sauce-labs-backpack');
             await expect(inventoryPage.cartBadge).toHaveText('1');

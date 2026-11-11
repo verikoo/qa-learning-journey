@@ -4,7 +4,7 @@
 import { test, expect } from '../fixtures/pages';
 
 test.describe('Products Page', () => {
-    test('shows 6 products', async ({ inventoryPage }) => {
+    test('shows 6 products', { tag: '@smoke' }, async ({ inventoryPage }) => {
         await expect(inventoryPage.productNames).toHaveCount(6);
     });
 
