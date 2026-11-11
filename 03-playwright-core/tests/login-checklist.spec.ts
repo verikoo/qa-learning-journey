@@ -4,6 +4,9 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { InventoryPage } from '../pages/InventoryPage';
 
+// These tests check the login itself, so they must start logged OUT
+test.use({ storageState: { cookies: [], origins: [] } });
+
 interface InvalidLogin {
     name: string;
     username: string;

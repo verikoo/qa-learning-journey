@@ -5,6 +5,8 @@
 import { test, expect } from '../fixtures/pages';
 
 import { users } from '../test-data/users';
+// These tests check the login itself, so they must start logged OUT
+test.use({ storageState: { cookies: [], origins: [] } });
 
 
 test.describe('Login', () => {
