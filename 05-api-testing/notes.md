@@ -132,3 +132,36 @@
 - Cleanup must survive failures: `try { ...asserts... } finally { delete }`
 - Fixture teardown runs even when the test fails → safest place for cleanup
 - Import styles: `{ value }` · `{ type T }` (types only) · `{ test as base }` (rename) · `* as x` (everything)
+
+
+## Phase 5 Checkpoint: Hybrid test
+
+### Idea
+- Hybrid test = UI test with a FAST setup channel; verify only what the test is about
+- Real projects: set up via API (POST /api/cart), verify in the browser
+- SauceDemo has no API, so the fast channel is browser storage (like storageState for cookies)
+
+### Investigation first (DevTools → Application → Local storage)
+- Key `cart-contents`, value `[4]` after Backpack, `[4,0]` after Bike Light
+- Ids match the `item-4` / `item-0` test ids; order = order added; badge = list length
+
+### Code (tests/ui/cart-hybrid.spec.ts)
+- `page.addInitScript((ids) => localStorage.setItem('cart-contents', JSON.stringify(ids)), [4, 0])`
+  runs in the page BEFORE the site's scripts; args are passed in because the code runs in the browser
+- Then `page.goto('/cart.html')` → cart already full, ZERO clicks
+- `toHaveText([...])` with an array checks all elements, in order
+- Named constants (`BACKPACK_ID = 4`) instead of magic numbers
+- Two hybrid setups combined: saved session cookie + local storage
+
+### UI Mode tips
+- Tests hidden? Check the Projects filter (tick chromium)
+- Select the TEST (expand the file), not the file, to see actions
+
+### Finding
+- Direct navigation to /cart.html returns HTTP 404 (single-page app fallback) while the page renders:
+  invisible to users, but monitoring tools and link checkers see "broken" pages → worth reporting
+- "Permissions policy violation: unload" = SauceDemo's own code, noise
+
+### Also done
+- Capstone README: API tests ✅ in the roadmap, new folders, `npm run test:api`
+- Copy code blocks with the Copy button 📋 (mouse-selecting loses Markdown symbols)
