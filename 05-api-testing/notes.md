@@ -88,3 +88,47 @@
 - Class methods: `name(params): Type { }` (no =>) · callbacks: `(params) => { }`
 - `;` after imports, const, return, await lines; not after closing } of methods/classes/if
 - Ctrl + Space = force autocomplete suggestions
+
+## Exercise 3: Schema validation with Zod
+
+### Why schemas
+- Phase 1 checkpoint: validated each field by hand with if + problems.push (long!)
+- Zod: describe the expected shape ONCE, check any data against it
+- A schema = a CONTRACT ("this endpoint always returns this shape") → basis of contract testing
+- toEqual checks VALUES of my data; schemas check SHAPE and TYPES (missing/extra fields, wrong types, bad dates)
+
+### Zod basics (zod v4, `import { z } from 'zod'`)
+| Zod | Means |
+| --- | --- |
+| `z.string()`, `z.number()`, `z.boolean()` | type checks |
+| `.min(1)` / `.int().positive()` / `.nonnegative()` | not empty / whole > 0 / >= 0 |
+| `z.iso.date()` | YYYY-MM-DD date string |
+| `.optional()` | field may be missing |
+| `z.object()` vs `z.strictObject()` | extra keys allowed (stripped) vs extra keys = error |
+| `z.array(schema)` | every item matches |
+| `schema.safeParse(data)` | `{ success, data }` or `{ success: false, error }`, never throws |
+| `result.error.issues` | list of problems: `path` + `message` |
+| `z.infer<typeof Schema>` | TypeScript type from a schema |
+
+- Schemas snap together: `CreateBookingResponseSchema` contains `BookingSchema`
+
+### Helper: utils/schema.ts
+- `expectToMatchSchema(data: unknown, schema: z.ZodType)`
+- Turns issues into `path: message` lines; `expect(problems).toEqual([])` lists ALL problems on failure
+- `data: unknown` = untrusted API data
+
+### Tests
+- Booking id list, create response, get response match their schemas
+- Self-test: broken data (string price, 'tomorrow' date, extra field) must be rejected
+- `expect.arrayContaining([...])` = includes at least these items
+
+### Break-the-contract experiment
+- Changed `totalprice` to `z.string()` → create + get tests failed with path
+  `booking.totalprice` (nested) vs `totalprice` (top level)
+- The self-test failed too: the schema now ACCEPTED bad data → the self-test guards the schema itself
+
+### Lessons
+- `Received: Promise {}` = something async used without await, or the wrong method (`json()` instead of `status()`)
+- Cleanup must survive failures: `try { ...asserts... } finally { delete }`
+- Fixture teardown runs even when the test fails → safest place for cleanup
+- Import styles: `{ value }` · `{ type T }` (types only) · `{ test as base }` (rename) · `* as x` (everything)
