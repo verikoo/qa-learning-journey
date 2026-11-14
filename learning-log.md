@@ -1,0 +1,1 @@
+- 2026-11-14: reviewed Phase 6 progress, planned practice mode
