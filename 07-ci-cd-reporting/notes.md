@@ -58,3 +58,18 @@
 - Every change is tested twice: on the PR, then on main after merging
 - "Use workflow from" = which branch's code + YAML to run (can test unmerged branches)
 - Artifacts: run page → Artifacts → playwright-report zip → unzip → open index.html
+
+
+
+## Exercise 3: Browser matrix (parallel jobs)
+- `strategy: matrix: include:` = one job per combination, all running in PARALLEL
+- Jobs: UI tests on chromium, firefox, webkit, mobile-chrome + a separate API job
+- Parallel = roughly the time of ONE job instead of four
+- `${{ matrix.project }}` = the value for this job · used in names, commands, artifact names
+- `fail-fast: false` = one failing browser doesn't cancel the others (full picture: "fails only on WebKit")
+- The setup project uses the default browser (Chromium), so EVERY job installs Chromium + its own browser:
+  `npx playwright install --with-deps chromium ${{ matrix.browser }}`
+- Unique artifact names per job (`playwright-report-${{ matrix.project }}`), or reports overwrite each other
+- Top-level `env:` = secrets shared by all jobs (DRY)
+- API tests in their own job: no browser install, fast
+- Result: 5 green checks on the first try; the run Summary shows the jobs side by side
