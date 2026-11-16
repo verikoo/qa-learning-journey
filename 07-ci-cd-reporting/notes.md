@@ -73,3 +73,25 @@
 - Top-level `env:` = secrets shared by all jobs (DRY)
 - API tests in their own job: no browser install, fast
 - Result: 5 green checks on the first try; the run Summary shows the jobs side by side
+
+
+
+## Exercise 4: GitHub reporter (PR annotations)
+- Reporter = how results are shown: `html` (report), `list` (terminal), `github` (PR annotations)
+- `github` reporter writes failures as annotations ON the failing line in the PR ("Files changed")
+  and in the run Summary → developers see what broke without opening logs
+- Config: `reporter: process.env.CI ? [['github'], ['list'], ['html', { open: 'never' }]]
+  : [['list'], ['html', { open: 'on-failure' }]]`
+- On CI: `open: 'never'` (no screen in the cloud) · locally: report opens only on failure
+- `git revert HEAD --no-edit` = undo a commit with a NEW commit (keeps history honest on shared branches)
+
+### Lesson from tonight: the red-title mystery
+- Local run: products page visual test failed (131 → 12195 pixels different)
+- Cause: the `addStyleTag` break-it line was in the local file, but NOT committed
+  (git showed no change after removing it) → most likely a stale practice tab saved onto main
+- Editing in VS Code "didn't work" because the editor and the disk were out of sync
+- Fixed with `sed -i '' '/addStyleTag/d' file`, verified with `grep -n`
+- Lessons: close/reload tabs after switching branches · trust `git status` / `git diff` / `grep`
+  over the editor · tests excluded from CI (visual) can break silently
+- Never run `--update-snapshots` before checking the page really looks right
+- One commit = one purpose
