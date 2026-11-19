@@ -38,3 +38,9 @@
 - Commit AI draft first, then the review fixes → history shows exactly what the human changed
 - Requirements left out of a prompt are not guessed by the AI
 - CI: green on all 4 browsers → merged
+## Exercise 2: Healer
+- Simulated a renamed button: CartPage continueShoppingButton 'Continue Shopping' -> 'Back to Shopping'
+- Result: 2 failed, 3 passed, 34.5s = slow failure (waiting for a button that never appears)
+- After a VS Code update the agents were hidden: Customizations -> Migrations -> Migrate
+  moved the MCP server from .vscode/mcp.json to .mcp.json
+- Healer fixed it in pages/CartPage.ts (page object, +1 -1), verified 13 tests on 3 browsers
